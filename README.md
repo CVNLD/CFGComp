@@ -1,3 +1,5 @@
+![Build Status](https://github.com/CVNLD/CFGComp/workflows/MSBuild/badge.svg)
+
 ## Features
 
 - Read PCIe configuration space from physical devices

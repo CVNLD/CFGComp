@@ -3,6 +3,8 @@ name: MSBuild
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ "main" ]
 
@@ -11,7 +13,7 @@ env:
   BUILD_CONFIGURATION: Release
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -36,3 +38,11 @@ jobs:
       with:
         name: CFGComp
         path: ${{github.workspace}}/x64/${{env.BUILD_CONFIGURATION}}/CFGComp.exe
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{github.workspace}}/x64/${{env.BUILD_CONFIGURATION}}/CFGComp.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

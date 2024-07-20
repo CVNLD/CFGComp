@@ -24,17 +24,17 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
-    - name: List output directory
+    - name: List build output
       run: |
-        Get-ChildItem -Path "${{github.workspace}}\x64\${{env.BUILD_CONFIGURATION}}" -Recurse
-    - name: Check for executable
+        Get-ChildItem -Path "${{github.workspace}}" -Recurse -Filter "*.exe"
+    - name: Find executable
       run: |
-        $exePath = "${{github.workspace}}\x64\${{env.BUILD_CONFIGURATION}}\CFGComp.exe"
-        if (Test-Path $exePath) {
+        $exePath = Get-ChildItem -Path "${{github.workspace}}" -Recurse -Filter "CFGComp.exe" | Select-Object -First 1 -ExpandProperty FullName
+        if ($exePath) {
           echo "Executable found at $exePath"
           echo "EXE_PATH=$exePath" >> $env:GITHUB_ENV
         } else {
-          echo "Executable not found at $exePath"
+          echo "Executable not found"
           exit 1
         }
     - name: Debug Info
@@ -44,13 +44,30 @@ jobs:
         echo "Executable path: ${{ env.EXE_PATH }}"
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ${{ env.EXE_PATH }}
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $tag = $env:GITHUB_REF.Replace('refs/tags/', '')
+        $releaseName = "Release $tag"
+        $releaseNotes = "Automated release for version $tag"
+        
+        $releaseData = @{
+          tag_name = $tag
+          name = $releaseName
+          body = $releaseNotes
+          draft = $false
+          prerelease = $false
+        } | ConvertTo-Json
+        
+        $response = Invoke-RestMethod -Uri "https://api.github.com/repos/${{ github.repository }}/releases" -Method Post -Headers @{
+          Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
+          "Content-Type" = "application/json"
+        } -Body $releaseData
+        
+        $uploadUrl = $response.upload_url -replace '{.*}', ''
+        
+        Invoke-RestMethod -Uri "${uploadUrl}?name=CFGComp.exe" -Method Post -Headers @{
+          Authorization = "token ${{ secrets.GITHUB_TOKEN }}"
+          "Content-Type" = "application/octet-stream"
+        } -InFile ${{ env.EXE_PATH }}
     - name: Upload artifact for debugging
       uses: actions/upload-artifact@v2
       with:

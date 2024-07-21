@@ -40,7 +40,7 @@ CFGComp.exe <coe_file> <bus:device:function> [--debug]
 
 Example:
 ```
-CFGComp.exe input.coe 01:00.0 --debug
+CFGComp.exe input.coe 01:00:0 --debug
 ```
 
 ## Output

@@ -1,4 +1,7 @@
 ![Build Status](https://github.com/CVNLD/CFGComp/workflows/MSBuild/badge.svg)
+## CFGComp
+
+![Alt text](https://i.imgur.com/fpIvISS.png)
 
 ## Features
 

@@ -133,28 +133,25 @@ std::wstring GetTempDriverPath() {
 bool ParsePCIAddress(const std::string& pciAddress, UINT8& bus, UINT8& device, UINT8& function) {
     std::istringstream iss(pciAddress);
     std::string segment;
-
     try {
         if (std::getline(iss, segment, ':')) {
-            bus = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
+            bus = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
         }
         if (std::getline(iss, segment, ':')) {
-            device = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
+            device = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
         }
         if (std::getline(iss, segment)) {
-            function = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
+            function = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
         }
     }
     catch (const std::exception& e) {
         DEBUG_PRINT(L"[ERROR] Failed to parse PCI address: {}", e.what());
         return false;
     }
-
     if (bus > 255 || device > 31 || function > 7) {
         DEBUG_PRINT(L"[ERROR] Invalid PCI address values. Bus (0-255), Device (0-31), Function (0-7)");
         return false;
     }
-
-    DEBUG_PRINT(L"Parsed PCI Address: {:X}:{:X}:{:X}", static_cast<int>(bus), static_cast<int>(device), static_cast<int>(function));
+    DEBUG_PRINT(L"Parsed PCI Address: {}:{}:{}", static_cast<int>(bus), static_cast<int>(device), static_cast<int>(function));
     return true;
 }

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (!IsElevated()) {
-        DEBUG_PRINT(L"[ERROR] This program requires administrator privileges.");
+        printf("[ERROR] This program requires administrator privileges.\n");
         return 1;
     }
     DEBUG_PRINT(L"Running with administrator privileges");
@@ -90,20 +90,17 @@ int main(int argc, char* argv[]) {
         DumpConfigSpace(deviceData);
     }
 
-    // Check if the device matches
     UINT16 readVendorId = *reinterpret_cast<UINT16*>(&deviceData[0]);
     UINT16 readDeviceId = *reinterpret_cast<UINT16*>(&deviceData[2]);
 
     DEBUG_PRINT(L"Raw Read Vendor ID: 0x{:X}, Device ID: 0x{:X}", readVendorId, readDeviceId);
 
-    // Swap bytes if necessary
-    if (readVendorId != coeData.vendorId || readDeviceId != coeData.deviceId) {
-        DEBUG_PRINT(L"Endianness mismatch detected. Swapping bytes.");
-        readVendorId = SwapBytes(readVendorId);
-        readDeviceId = SwapBytes(readDeviceId);
+    if (readVendorId == 0xFFFF && readDeviceId == 0x0000) {
+        std::wcout << L"Error: The specified device does not exist." << std::endl;
+        std::wcout << L"Please check the PCI address (bus:device:function) and try again." << std::endl;
+        driver.Unload();
+        return 1;
     }
-
-    DEBUG_PRINT(L"Corrected Vendor ID: 0x{:X}, Device ID: 0x{:X}", readVendorId, readDeviceId);
 
     std::wcout << L"Device Information:" << std::endl;
     std::wcout << L"Vendor ID: 0x" << std::hex << readVendorId

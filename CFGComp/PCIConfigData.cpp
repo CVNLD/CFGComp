@@ -111,7 +111,7 @@ void CompareConfigSpaces(const std::vector<uint8_t>& coeData, const std::vector<
         std::wcout << L"Congratulations, CFG Space is 1:1 with input coe file." << std::endl;
     }
     else {
-        std::wcout << mismatches << L" bytes didn't match." << std::endl;
+        std::wcout << std::dec << mismatches << L" bytes didn't match." << std::endl;
     }
 
     DEBUG_PRINT(L"Exiting CompareConfigSpaces function");

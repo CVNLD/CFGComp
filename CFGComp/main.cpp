@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     if (!ParsePCIAddress(pciAddress, bus, device, function)) {
         return 1;
     }
-
+    DEBUG_PRINT(L"Main - Parsed PCI Address: {:02X}:{:02X}:{:02X}", static_cast<int>(bus), static_cast<int>(device), static_cast<int>(function));
     std::wstring driverPath = GetTempDriverPath();
     if (driverPath.empty()) {
         return 1;

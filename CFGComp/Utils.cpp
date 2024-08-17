@@ -102,13 +102,13 @@ void DumpConfigSpace(const std::vector<uint8_t>& configSpace) {
 std::vector<uint8_t> ReadPCIConfigSpace(RTCoreDriver& driver, UINT8 bus, UINT8 device, UINT8 function) {
     std::vector<uint8_t> configSpace(CONFIG_SPACE_SIZE, 0);
 
-    DEBUG_PRINT(L"ReadPCIConfigSpace input - Bus: 0x{:X}, Device: 0x{:X}, Function: 0x{:X}",
-        static_cast<int>(bus), static_cast<int>(device), static_cast<int>(function));
+    DEBUG_PRINT(L"ReadPCIConfigSpace input - Bus: 0x%02X, Device: 0x%02X, Function: 0x%02X",
+        bus, device, function);
 
     for (UINT32 offset = 0; offset < CONFIG_SPACE_SIZE; offset += 4) {
         DWORD data = driver.ReadPCIConfig(bus, device, function, offset, 4);
 
-        DEBUG_PRINT(L"Offset 0x{:02X}: 0x{:08X}", offset, data);
+        DEBUG_PRINT(L"Offset 0x%02X: 0x%08X", offset, data);
 
         configSpace[offset] = data & 0xFF;
         configSpace[offset + 1] = (data >> 8) & 0xFF;
@@ -135,23 +135,23 @@ bool ParsePCIAddress(const std::string& pciAddress, UINT8& bus, UINT8& device, U
     std::string segment;
     try {
         if (std::getline(iss, segment, ':')) {
-            bus = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
+            bus = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
         }
         if (std::getline(iss, segment, ':')) {
-            device = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
+            device = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
         }
         if (std::getline(iss, segment)) {
-            function = static_cast<UINT8>(std::stoul(segment, nullptr, 10));
+            function = static_cast<UINT8>(std::stoul(segment, nullptr, 16));
         }
     }
     catch (const std::exception& e) {
-        DEBUG_PRINT(L"[ERROR] Failed to parse PCI address: {}", e.what());
+        DEBUG_PRINT(L"[ERROR] Failed to parse PCI address: %S", e.what());
         return false;
     }
     if (bus > 255 || device > 31 || function > 7) {
         DEBUG_PRINT(L"[ERROR] Invalid PCI address values. Bus (0-255), Device (0-31), Function (0-7)");
         return false;
     }
-    DEBUG_PRINT(L"Parsed PCI Address: {}:{}:{}", static_cast<int>(bus), static_cast<int>(device), static_cast<int>(function));
+    DEBUG_PRINT(L"Parsed PCI Address: %02X:%02X:%02X", bus, device, function);
     return true;
 }
